@@ -16,14 +16,14 @@ class MyApp extends StatelessWidget {
 
 class ShoppingPage extends StatelessWidget {
   final List<Product> products = [
-    Product(name: 'Fosmon X100 SE GPS Drone', price: 229, imageUrl: 'https://via.placeholder.com/150'),
-    Product(name: 'COLIBRI 12 Pods Hydroponics', price: 43, imageUrl: 'https://via.placeholder.com/150'),
-    Product(name: 'Wi-Fi Soil Moisture Meter', price: 26, imageUrl: 'https://via.placeholder.com/150'),
-    Product(name: 'Dwi Dowellin Mini Drone', price: 39, imageUrl: 'https://via.placeholder.com/150'),
-    Product(name: '5x Tower Garden Hydroponics', price: 118, imageUrl: 'https://via.placeholder.com/150'),
-    Product(name: 'Drone with Camera 2K', price: 89, imageUrl: 'https://via.placeholder.com/150'),
-    Product(name: 'Drone with dual camera', price: 70, imageUrl: 'https://via.placeholder.com/150'),
-    Product(name: 'Maxim Smart Plant Sport', price: 128, imageUrl: 'https://via.placeholder.com/150'),
+    Product(name: 'Fosmon X100 SE GPS Drone', price: 2290000, imageUrl: 'https://via.placeholder.com/150'), // Ubah harga ke IDR
+    Product(name: 'COLIBRI 12 Pods Hydroponics', price: 430000, imageUrl: 'https://via.placeholder.com/150'),
+    Product(name: 'Wi-Fi Soil Moisture Meter', price: 260000, imageUrl: 'https://via.placeholder.com/150'),
+    Product(name: 'Dwi Dowellin Mini Drone', price: 390000, imageUrl: 'https://via.placeholder.com/150'),
+    Product(name: '5x Tower Garden Hydroponics', price: 1180000, imageUrl: 'https://via.placeholder.com/150'),
+    Product(name: 'Drone with Camera 2K', price: 890000, imageUrl: 'https://via.placeholder.com/150'),
+    Product(name: 'Drone with dual camera', price: 700000, imageUrl: 'https://via.placeholder.com/150'),
+    Product(name: 'Maxim Smart Plant Sport', price: 1280000, imageUrl: 'https://via.placeholder.com/150'),
   ];
 
   @override
@@ -68,7 +68,7 @@ class ShoppingPage extends StatelessWidget {
 
 class Product {
   final String name;
-  final double price;
+  final double price; // Harga dalam IDR
   final String imageUrl;
 
   Product({required this.name, required this.price, required this.imageUrl});
@@ -113,7 +113,7 @@ class ProductCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(6.0),
               child: Text(
-                '\$${product.price}',
+                'IDR ${product.price.toStringAsFixed(0)}', // Ubah format harga ke IDR
                 style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
               ),
             ),

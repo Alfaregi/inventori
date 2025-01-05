@@ -3,6 +3,7 @@ import 'package:inventori/admin/profile_admin.dart';
 import 'package:inventori/admin/report_admin.dart';
 import 'package:inventori/admin/updateproduct_admin.dart';
 import 'package:inventori/admin/addproduct_admin.dart';
+import 'package:inventori/admin/checkout_admin.dart'; // Tambahkan ini
 
 void main() {
   runApp(MyApp());
@@ -32,6 +33,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   final List<Widget> _pages = [
     AdminHomePageContent(),
     AdminReportPage(), // Halaman laporan keuangan
+    CheckoutPage(), // Halaman checkout
     AdminProfilePage(),
   ];
 
@@ -60,6 +62,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.pie_chart), label: 'Report'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Checkout'), // Tambahkan ini
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         backgroundColor: Colors.white,

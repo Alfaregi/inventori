@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -30,6 +28,8 @@ class _PaymentPageState extends State<PaymentPage> {
   double get total {
     return cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
   }
+
+  final TextEditingController addressController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +65,19 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
             Divider(),
+            // Form Alamat
+            Text(
+              'Shipping Address:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            TextField(
+              controller: addressController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Enter your address',
+              ),
+            ),
+            SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
@@ -147,6 +160,7 @@ class _PaymentPageState extends State<PaymentPage> {
             ElevatedButton(
               onPressed: () {
                 // Aksi untuk menyelesaikan pembayaran
+                // Anda bisa menggunakan addressController.text untuk mendapatkan alamat
               },
               child: Text('Pay'),
               style: ElevatedButton.styleFrom(
