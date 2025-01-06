@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class MyApp extends StatelessWidget {
   @override
@@ -33,26 +35,48 @@ class _AddProductPageState extends State<AddProductPage> {
     super.dispose();
   }
 
-  void _saveProduct() {
-    // Logika untuk menyimpan produk
-    // Anda bisa menambahkan logika penyimpanan di sini
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Product Added'),
-          content: Text('The product has been added successfully.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Tutup dialog
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
+  Future<void> _saveProduct() async {
+    final String name = productNameController.text;
+    final String description = productDetailController.text;
+    final String price = priceController.text;
+    final String stock = qtyController.text;
+    final String image = ""; // Tambahkan logika untuk mendapatkan URL/path gambar
+    final String idCategory = "3"; // Sesuaikan dengan kategori yang ada
+
+    final response = await http.post(
+      Uri.parse('http://localhost/admininventori/addproduct_admin.php'), // Ganti dengan URL server Anda
+      body: {
+        'name': name,
+        'description': description,
+        'price': price,
+        'stock': stock,
+        'image': image,
+        'id_category': idCategory,
       },
     );
+
+    if (response.statusCode == 200) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Product Added'),
+            content: Text('The product has been added successfully.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Tutup dialog
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // Handle error
+      print('Failed to add product');
+    }
   }
 
   @override
@@ -145,4 +169,3 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 }
-

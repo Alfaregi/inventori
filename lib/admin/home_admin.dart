@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:inventori/admin/profile_admin.dart';
 import 'package:inventori/admin/report_admin.dart';
 import 'package:inventori/admin/updateproduct_admin.dart';
 import 'package:inventori/admin/addproduct_admin.dart';
-import 'package:inventori/admin/checkout_admin.dart'; // Tambahkan ini
+import 'package:inventori/admin/checkout_admin.dart';
 
 void main() {
   runApp(MyApp());
@@ -29,12 +31,32 @@ class AdminHomePage extends StatefulWidget {
 
 class _AdminHomePageState extends State<AdminHomePage> {
   int _selectedIndex = 0;
+  List<Product> products = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProducts(); // Ambil data produk saat halaman dimuat
+  }
+
+  Future<void> fetchProducts() async {
+    final response = await http.get(Uri.parse('http://10.0.2.2/admininventori/getproduct_admin.php')); // Ganti dengan URL server Anda
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      setState(() {
+        products = data.map((item) => Product.fromJson(item)).toList();
+      });
+    } else {
+      throw Exception('Failed to load products');
+    }
+  }
 
   final List<Widget> _pages = [
-    AdminHomePageContent(),
-    AdminReportPage(), // Halaman laporan keuangan
+    AdminHomePage(), // Halaman konten admin
+    AdminReportPage(), // Halaman laporan
     CheckoutPage(), // Halaman checkout
-    AdminProfilePage(),
+    AdminProfilePage(), // Halaman profil
   ];
 
   void _onItemTapped(int index) {
@@ -50,7 +72,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         title: Text('DKI JAYA STORE'),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: Icon(Icons.notifications), 
             onPressed: () {
               // Aksi untuk notifikasi
             },
@@ -62,7 +84,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.pie_chart), label: 'Report'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Checkout'), // Tambahkan ini
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Checkout'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         backgroundColor: Colors.white,
@@ -70,21 +92,15 @@ class _AdminHomePageState extends State<AdminHomePage> {
         unselectedItemColor: Colors.grey[300],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-      ),
+      ),  
     );
   }
 }
 
 class AdminHomePageContent extends StatelessWidget {
-  final List<Product> products = [
-    Product(name: 'Car Steering Wheel', quantity: 12, imageUrl: 'https://via.placeholder.com/100'),
-    Product(name: 'Car Mirror', quantity: 12, imageUrl: 'https://via.placeholder.com/100'),
-    Product(name: 'Car AC Filter', quantity: 12, imageUrl: 'https://via.placeholder.com/100'),
-    Product(name: 'Car Turn Signal', quantity: 12, imageUrl: 'https://via.placeholder.com/100'),
-    Product(name: 'Front Car Light', quantity: 12, imageUrl: 'https://via.placeholder.com/100'),
-    Product(name: 'Car Gears', quantity: 0, imageUrl: 'https://via.placeholder.com/100'),
-    Product(name: 'Car Rear View Mirror', quantity: 9, imageUrl: 'https://via.placeholder.com/100'),
-  ];
+  final List<Product> products;
+
+  AdminHomePageContent({required this.products});
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +124,7 @@ class AdminHomePageContent extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProductPage1())); // Aksi untuk menambah produk
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProductPage1()));
                 },
                 child: Text('Update Product'),
                 style: ElevatedButton.styleFrom(
@@ -119,11 +135,11 @@ class AdminHomePageContent extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => AddProductPage()));// Aksi untuk mengedit produk
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => AddProductPage()));
                 },
                 child: Text('Add Product'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue, // Warna tombol edit
+                  backgroundColor: Colors.blue,
                   padding: EdgeInsets.symmetric(vertical: 15),
                   textStyle: TextStyle(fontSize: 18),
                 ),
@@ -155,6 +171,14 @@ class Product {
   final String imageUrl;
 
   Product({required this.name, required this.quantity, required this.imageUrl});
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      name: json['name'],
+      quantity: json['stock'], // Pastikan ini sesuai dengan nama kolom di database
+      imageUrl: json['image'], // Pastikan ini sesuai dengan nama kolom di database
+    );
+  }
 }
 
 class StatCard extends StatelessWidget {
