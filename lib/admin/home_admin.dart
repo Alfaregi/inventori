@@ -7,10 +7,6 @@ import 'package:inventori/admin/updateproduct_admin.dart';
 import 'package:inventori/admin/addproduct_admin.dart';
 import 'package:inventori/admin/checkout_admin.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -26,21 +22,22 @@ class MyApp extends StatelessWidget {
 
 class AdminHomePage extends StatefulWidget {
   @override
-  _AdminHomePageState createState() => _AdminHomePageState();
+  AdminHomePageState createState() => AdminHomePageState();
 }
 
-class _AdminHomePageState extends State<AdminHomePage> {
+class AdminHomePageState extends State<AdminHomePage> {
   int _selectedIndex = 0;
   List<Product> products = [];
 
   @override
   void initState() {
     super.initState();
-    fetchProducts(); // Ambil data produk saat halaman dimuat
+    fetchProducts(); // Fetch product data when the page loads
   }
 
   Future<void> fetchProducts() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2/admininventori/getproduct_admin.php')); // Ganti dengan URL server Anda
+    final response = await http
+        .get(Uri.parse('http://10.0.2.2/beinventori/getproduct_admin.php'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
@@ -52,12 +49,18 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
   }
 
-  final List<Widget> _pages = [
-    AdminHomePage(), // Halaman konten admin
-    AdminReportPage(), // Halaman laporan
-    CheckoutPage(), // Halaman checkout
-    AdminProfilePage(), // Halaman profil
-  ];
+  final List<Widget> _pages = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialize the pages list with the current products
+    _pages.clear();
+    _pages.add(AdminHomePageContent(products: products));
+    _pages.add(AdminReportPage());
+    _pages.add(CheckoutPage());
+    _pages.add(AdminProfilePage());
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -72,19 +75,22 @@ class _AdminHomePageState extends State<AdminHomePage> {
         title: Text('DKI JAYA STORE'),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications), 
+            icon: Icon(Icons.notifications),
             onPressed: () {
-              // Aksi untuk notifikasi
+              // Action for notifications
             },
           ),
         ],
       ),
-      body: _pages[_selectedIndex],
+      body: _pages.isNotEmpty
+          ? _pages[_selectedIndex]
+          : Center(child: CircularProgressIndicator()),
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.pie_chart), label: 'Report'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Checkout'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart), label: 'Checkout'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         backgroundColor: Colors.white,
@@ -92,7 +98,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         unselectedItemColor: Colors.grey[300],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-      ),  
+      ),
     );
   }
 }
@@ -112,9 +118,14 @@ class AdminHomePageContent extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              StatCard(label: 'Total Products', value: '200', color: Colors.pink),
-              StatCard(label: 'Total Transaction', value: '10', color: Colors.blue),
-              StatCard(label: 'Income', value: 'IDR 750.000', color: Colors.green),
+              StatCard(
+                  label: 'Total Products',
+                  value: products.length.toString(),
+                  color: Colors.pink),
+              StatCard(
+                  label: 'Total Transaction', value: '10', color: Colors.blue),
+              StatCard(
+                  label: 'Income', value: 'IDR 750.000', color: Colors.green),
               StatCard(label: 'Check Out', value: '3', color: Colors.orange),
             ],
           ),
@@ -124,7 +135,10 @@ class AdminHomePageContent extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProductPage1()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UpdateProductPage1()));
                 },
                 child: Text('Update Product'),
                 style: ElevatedButton.styleFrom(
@@ -135,7 +149,10 @@ class AdminHomePageContent extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => AddProductPage()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AddProductPage()));
                 },
                 child: Text('Add Product'),
                 style: ElevatedButton.styleFrom(
@@ -152,12 +169,14 @@ class AdminHomePageContent extends StatelessWidget {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                return ProductListItem(product: products[index]);
-              },
-            ),
+            child: products.isNotEmpty
+                ? ListView.builder(
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      return ProductListItem(product: products[index]);
+                    },
+                  )
+                : Center(child: Text('No products available')),
           ),
         ],
       ),
@@ -174,9 +193,9 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      name: json['name'],
-      quantity: json['stock'], // Pastikan ini sesuai dengan nama kolom di database
-      imageUrl: json['image'], // Pastikan ini sesuai dengan nama kolom di database
+      name: json['name'] ?? 'Unknown Product',
+      quantity: json['stock'] != null ? int.parse(json['stock'].toString()) : 0,
+      imageUrl: json['image'] ?? 'default_image_url.png',
     );
   }
 }
@@ -201,7 +220,8 @@ class StatCard extends StatelessWidget {
         children: [
           Text(
             value,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           SizedBox(height: 4),
           Text(
@@ -225,8 +245,9 @@ class ProductListItem extends StatelessWidget {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
       child: ListTile(
-        leading: Image.network(product.imageUrl, width: 50, height: 50, fit: BoxFit.cover),
-        title: Text(product.name),
+        leading: Image.network(product.imageUrl,
+            width: 50, height: 50, fit: BoxFit.cover),
+        title: Text(product.name.isNotEmpty ? product.name : 'No Name'),
         trailing: Text('Qty ${product.quantity}'),
       ),
     );

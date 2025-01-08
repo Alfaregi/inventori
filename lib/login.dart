@@ -70,11 +70,13 @@ class LoginPage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Aksi untuk mendaftar
-                Navigator.push(context, MaterialPageRoute(builder: (context) => AdminHomePage()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => AdminHomePage()));
               },
               child: Text('LOGIN'),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.blue, backgroundColor: Colors.white, // Warna teks tombol
+                foregroundColor: Colors.blue,
+                backgroundColor: Colors.white, // Warna teks tombol
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 textStyle: TextStyle(fontSize: 18),
                 shape: RoundedRectangleBorder(
@@ -93,7 +95,8 @@ class LoginPage extends StatelessWidget {
               },
               child: Text(
                 'Dont Have Account? Register here!',
-                style: TextStyle(color: Colors.white, decoration: TextDecoration.underline),
+                style: TextStyle(
+                    color: Colors.white, decoration: TextDecoration.underline),
               ),
             ),
           ],
