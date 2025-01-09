@@ -28,6 +28,7 @@ class AdminHomePage extends StatefulWidget {
 class AdminHomePageState extends State<AdminHomePage> {
   int _selectedIndex = 0;
   List<Product> products = [];
+  List<Widget> _pages = [];
 
   @override
   void initState() {
@@ -40,21 +41,22 @@ class AdminHomePageState extends State<AdminHomePage> {
         .get(Uri.parse('http://10.0.2.2/beinventori/getproduct_admin.php'));
 
     if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      setState(() {
-        products = data.map((item) => Product.fromJson(item)).toList();
-      });
+      try {
+        List<dynamic> data = json.decode(response.body);
+        print('Data received: $data'); // Debug statement
+        setState(() {
+          products = data.map((item) => Product.fromJson(item)).toList();
+          _initializePages(); // Initialize pages after products are fetched
+        });
+      } catch (e) {
+        print('Error decoding data: $e');
+      }
     } else {
-      throw Exception('Failed to load products');
+      print('Failed to load products. Status code: ${response.statusCode}');
     }
   }
 
-  final List<Widget> _pages = [];
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Initialize the pages list with the current products
+  void _initializePages() {
     _pages.clear();
     _pages.add(AdminHomePageContent(products: products));
     _pages.add(AdminReportPage());
@@ -186,16 +188,24 @@ class AdminHomePageContent extends StatelessWidget {
 
 class Product {
   final String name;
+  final String description; // Add this if you want to display the description
   final int quantity;
   final String imageUrl;
 
-  Product({required this.name, required this.quantity, required this.imageUrl});
+  Product({
+    required this.name,
+    required this.description,
+    required this.quantity,
+    required this.imageUrl,
+  });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    print('JSON data: $json'); // Debug statement
     return Product(
       name: json['name'] ?? 'Unknown Product',
-      quantity: json['stock'] != null ? int.parse(json['stock'].toString()) : 0,
-      imageUrl: json['image'] ?? 'default_image_url.png',
+      description: json['description'] ?? 'No Description',
+      quantity: int.tryParse(json['stock'].toString()) ?? 0,
+      imageUrl: json['image'] ?? '',
     );
   }
 }
@@ -245,9 +255,16 @@ class ProductListItem extends StatelessWidget {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
       child: ListTile(
-        leading: Image.network(product.imageUrl,
-            width: 50, height: 50, fit: BoxFit.cover),
+        leading: Image.network(
+          product.imageUrl,
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              Icon(Icons.image, size: 50), // Default icon if image fails
+        ),
         title: Text(product.name.isNotEmpty ? product.name : 'No Name'),
+        subtitle: Text(product.description), // Display description
         trailing: Text('Qty ${product.quantity}'),
       ),
     );
