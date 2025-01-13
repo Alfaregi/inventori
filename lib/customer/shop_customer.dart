@@ -72,6 +72,10 @@ class Product {
   final String imageUrl;
 
   Product({required this.name, required this.price, required this.imageUrl});
+
+  get image => null;
+
+  static fromJson(product) {}
 }
 
 class ProductCard extends StatelessWidget {

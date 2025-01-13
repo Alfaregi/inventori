@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:inventori/customer/cart_customer.dart';
 import 'package:inventori/customer/profile_customer.dart';
 import 'package:inventori/customer/shop_customer.dart';
@@ -28,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     HomeContent(), // Halaman utama
     ShoppingPage(), // Halaman belanja
-    CartPage(), //Halaman keranjang
+    CartPage(), // Halaman keranjang
     ProfilePage(),
     // Tambahkan halaman lain di sini jika perlu
   ];
@@ -62,7 +64,8 @@ class _HomePageState extends State<HomePage> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.shop), label: 'Shop'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Buy'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart), label: 'Buy'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
@@ -70,7 +73,32 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
+  @override
+  _HomeContentState createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  late Future<List<Product>> futureProducts;
+
+  @override
+  void initState() {
+    super.initState();
+    futureProducts = fetchProducts();
+  }
+
+  Future<List<Product>> fetchProducts() async {
+    final response = await http
+        .get(Uri.parse('http://10.0.2.2/beinventori/getproduct_admin.php'));
+
+    if (response.statusCode == 200) {
+      List jsonResponse = json.decode(response.body);
+      return jsonResponse.map((product) => Product.fromJson(product)).toList();
+    } else {
+      throw Exception('Failed to load products');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -94,12 +122,14 @@ class HomeContent extends StatelessWidget {
                   children: [
                     Text(
                       'Car Wheel',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     Text('Start from'),
                     Text(
                       'IDR 400.000',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -138,23 +168,65 @@ class HomeContent extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ProductCard(
-                imageUrl: 'https://via.placeholder.com/100',
-                name: 'Car Steering Wheel',
-                price: 'IDR 520.000',
-              ),
-              ProductCard(
-                imageUrl: 'https://via.placeholder.com/100',
-                name: 'Car Mirrors',
-                price: 'IDR 250.000',
-              ),
-            ],
+          FutureBuilder<List<Product>>(
+            future: futureProducts,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text('No products found'));
+              } else {
+                List<Product> products = snapshot.data!;
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return ProductCard(
+                      imageUrl: products[index].image,
+                      name: products[index].name,
+                      price: 'IDR ${products[index].price.toStringAsFixed(0)}',
+                    );
+                  },
+                );
+              }
+            },
           ),
         ],
       ),
+    );
+  }
+}
+
+class Product {
+  final int id;
+  final String name;
+  final int stock;
+  final double price;
+  final String image;
+
+  Product(
+      {required this.id,
+      required this.name,
+      required this.stock,
+      required this.price,
+      required this.image});
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: int.parse(json['id'].toString()), // Pastikan id dikonversi ke int
+      name: json['name'],
+      stock: int.parse(
+          json['stock'].toString()), // Pastikan stock dikonversi ke int
+      price: double.parse(
+          json['price'].toString()), // Pastikan price dikonversi ke double
+      image: json['image'],
     );
   }
 }
@@ -164,20 +236,40 @@ class ProductCard extends StatelessWidget {
   final String name;
   final String price;
 
-  ProductCard({required this.imageUrl, required this.name, required this.price});
+  ProductCard(
+      {required this.imageUrl, required this.name, required this.price});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Image.network(
-          imageUrl,
-          width: 100,
-          height: 100,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: Image.network(
+                imageUrl,
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Center(child: Text('Image not found'));
+                },
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              name,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 4),
+            Text(
+              price,
+              style: TextStyle(fontSize: 12),
+            ),
+          ],
         ),
-        Text(name),
-        Text(price),
-      ],
+      ),
     );
   }
 }
