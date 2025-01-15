@@ -12,7 +12,7 @@ class LoginPage extends StatelessWidget {
   
   Future<void> login(BuildContext context) async {  
     final response = await http.post(  
-      Uri.parse('http://10.0.2.2/beinventori/login.php'),  
+      Uri.parse('http://10.0.2.2/beinventori/login.php'),
       body: {  
         'username': usernameController.text,  
         'password': passwordController.text,  

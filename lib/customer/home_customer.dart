@@ -47,6 +47,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: Colors.grey[200],
         title: Text('DKI JAYA STORE'),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: Icon(Icons.notifications),
@@ -253,7 +254,7 @@ class ProductCard extends StatelessWidget {
                 height: 100,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return Center(child: Text('Image not found'));
+                  return Center(child: Text('rR found'));
                 },
               ),
             ),
