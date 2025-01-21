@@ -52,13 +52,14 @@ class _PaymentPageState extends State<PaymentPage> {
                 itemCount: cartItems.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    leading: Image.network(
-                      'https://via.placeholder.com/100', // Ganti dengan URL gambar produk
+                    leading: Image.asset(
+                      'assets/images/ban.png', // Ganti dengan URL gambar produk
                       width: 50,
                       height: 50,
                     ),
                     title: Text(cartItems[index].name),
-                    subtitle: Text('\$${cartItems[index].price.toStringAsFixed(2)}'),
+                    subtitle:
+                        Text('\$${cartItems[index].price.toStringAsFixed(2)}'),
                     trailing: Text('Qty: ${cartItems[index].quantity}'),
                   );
                 },
@@ -114,7 +115,7 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
             ListTile(
-              title: Text('Qiwi'),
+              title: Text('QRIS'),
               leading: Radio(
                 value: 2,
                 groupValue: selectedPaymentMethod,
@@ -126,7 +127,7 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
             ListTile(
-              title: Text('Bitcoin'),
+              title: Text('BCA'),
               leading: Radio(
                 value: 3,
                 groupValue: selectedPaymentMethod,
@@ -138,7 +139,7 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
             ListTile(
-              title: Text('Stripe'),
+              title: Text('Mandiri'),
               leading: Radio(
                 value: 4,
                 groupValue: selectedPaymentMethod,

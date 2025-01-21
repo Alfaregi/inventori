@@ -222,6 +222,8 @@ class Product {
   }
 
   get stock => null;
+
+  get image => null;
 }
 
 class StatCard extends StatelessWidget {

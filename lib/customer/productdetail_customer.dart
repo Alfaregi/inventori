@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'cart_customer.dart'; // Import halaman keranjang belanja
+import 'cart_customer.dart'; // Import cart page
 
 class ProductDetailPage extends StatelessWidget {
   final int productId;
@@ -17,6 +17,86 @@ class ProductDetailPage extends StatelessWidget {
     } else {
       throw Exception('Failed to load product details');
     }
+  }
+
+  Future<void> _showQuantityDialog(
+      BuildContext context, Product product) async {
+    int quantity = 1; // Default quantity
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Quantity'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('How many would you like to add to the cart?'),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.remove),
+                      onPressed: () {
+                        if (quantity > 1) {
+                          quantity--;
+                          // Update the state to reflect the new quantity
+                          (context as Element).markNeedsBuild();
+                        }
+                      },
+                    ),
+                    Text(quantity.toString(), style: TextStyle(fontSize: 24)),
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: () {
+                        if (quantity < product.stock) {
+                          // Check stock limit
+                          quantity++;
+                          // Update the state to reflect the new quantity
+                          (context as Element).markNeedsBuild();
+                        } else {
+                          // Show a message if trying to exceed stock
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Cannot exceed stock limit of ${product.stock}'),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Add to Cart'),
+              onPressed: () {
+                // Add the product to the cart with the selected quantity
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        CartPage(product: product, quantity: quantity),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -81,42 +161,16 @@ class ProductDetailPage extends StatelessWidget {
                     ProductDetailRow(
                         label: 'Description', value: product.description),
                     SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // Action for buying
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Buying now...')),
-                            );
-                          },
-                          child: Text('Buy Now'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 30, vertical: 15),
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Action for adding to cart
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    CartPage(product: product),
-                              ),
-                            );
-                          },
-                          child: Text('Add to Cart'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 30, vertical: 15),
-                          ),
-                        ),
-                      ],
+                    ElevatedButton(
+                      onPressed: () {
+                        _showQuantityDialog(context, product);
+                      },
+                      child: Text('Add to Cart'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      ),
                     ),
                   ],
                 ),
@@ -136,12 +190,13 @@ class Product {
   final int stock;
   final String description;
 
-  Product(
-      {required this.name,
-      required this.price,
-      required this.imageUrl,
-      required this.stock,
-      required this.description});
+  Product({
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+    required this.stock,
+    required this.description,
+  });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
