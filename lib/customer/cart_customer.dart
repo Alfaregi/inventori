@@ -12,7 +12,8 @@ class CartPage extends StatefulWidget {
   
   static void addToCart(Product product, int quantity) {  
     // Method to add product to cart  
-    final existingItem = cartItems.where((item) => item.name == product.name).toList();  
+    final existingItem =  
+        cartItems.where((item) => item.name == product.name).toList();  
   
     if (existingItem.isNotEmpty) {  
       // If the product already exists, add the quantity  
@@ -24,6 +25,7 @@ class CartPage extends StatefulWidget {
         price: product.price,  
         quantity: quantity,  
         imageUrl: product.imageUrl,  
+        stock: product.stock, // Add stock parameter  
       ));  
     }  
   }  
@@ -55,8 +57,10 @@ class _CartPageState extends State<CartPage> {
                 itemBuilder: (context, index) {  
                   return CartItemWidget(  
                     item: CartPage.cartItems[index],  
-                    onIncrement: () => _incrementQuantity(CartPage.cartItems[index]),  
-                    onDecrement: () => _decrementQuantity(CartPage.cartItems[index]),  
+                    onIncrement: () =>  
+                        _incrementQuantity(CartPage.cartItems[index]),  
+                    onDecrement: () =>  
+                        _decrementQuantity(CartPage.cartItems[index]),  
                   );  
                 },  
               ),  
@@ -72,7 +76,12 @@ class _CartPageState extends State<CartPage> {
             ElevatedButton(  
               onPressed: () {  
                 // Action to proceed to payment  
-                Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage()));  
+                Navigator.push(  
+                  context,  
+                  MaterialPageRoute(  
+                    builder: (context) => PaymentPage(),  
+                  ),  
+                );  
               },  
               child: Text('Proceed to Payment'),  
               style: ElevatedButton.styleFrom(  
@@ -90,7 +99,9 @@ class _CartPageState extends State<CartPage> {
   
   void _incrementQuantity(CartItem item) {  
     setState(() {  
-      item.quantity++;  
+      if (item.quantity < item.stock) {  
+        item.quantity++;  
+      }  
     });  
   }  
   
@@ -98,12 +109,15 @@ class _CartPageState extends State<CartPage> {
     setState(() {  
       if (item.quantity > 1) {  
         item.quantity--;  
+      } else {  
+        CartPage.cartItems.remove(item);  
       }  
     });  
   }  
   
   double get total {  
-    return CartPage.cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));  
+    return CartPage.cartItems  
+        .fold(0, (sum, item) => sum + (item.price * item.quantity));  
   }  
 }  
   
@@ -112,13 +126,17 @@ class CartItem {
   final double price;  
   int quantity;  
   final String imageUrl;  
+  final int stock; // Add stock parameter  
   
   CartItem({  
     required this.name,  
     required this.price,  
     required this.quantity,  
     required this.imageUrl,  
-  });  
+    required this.stock, // Add stock parameter  
+  });
+
+  get id => null;  
 }  
   
 class CartItemWidget extends StatelessWidget {  
@@ -156,6 +174,7 @@ class CartItemWidget extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),  
                   ),  
                   Text('IDR ${item.price.toStringAsFixed(0)}'),  
+                  Text('Stock: ${item.stock}'), // Display stock  
                 ],  
               ),  
             ),  
@@ -168,7 +187,9 @@ class CartItemWidget extends StatelessWidget {
                 Text('${item.quantity}'),  
                 IconButton(  
                   icon: Icon(Icons.add),  
-                  onPressed: onIncrement,  
+                  onPressed: item.quantity < item.stock  
+                      ? onIncrement  
+                      : null, // Disable increment if stock is reached  
                 ),  
               ],  
             ),  

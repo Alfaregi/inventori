@@ -51,7 +51,7 @@ class _AddProductPageState extends State<AddProductPage> {
     final String description = productDetailController.text;
     final String price = priceController.text;
     final String stock = qtyController.text;
-    final String idCategory = selectedCategory ?? ''; // Get selected category
+    // final String idCategory = selectedCategory ?? ''; // Get selected category
 
     if (_image != null) {
       final bytes = await _image!.readAsBytes();
@@ -68,7 +68,7 @@ class _AddProductPageState extends State<AddProductPage> {
           'price': price,
           'stock': stock,
           'image': base64Image,
-          'id_category': idCategory, // Use selected category
+          // 'id_category': idCategory, // Use selected category
         },
       );
 
@@ -162,24 +162,24 @@ class _AddProductPageState extends State<AddProductPage> {
                   keyboardType: TextInputType.number),
               SizedBox(height: 20),
               // Dropdown for category selection
-              DropdownButtonFormField<String>(
-                value: selectedCategory,
-                hint: Text('Select Category'),
-                items: categories.map((String category) {
-                  return DropdownMenuItem<String>(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedCategory = newValue;
-                  });
-                },
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
-              ),
+              // DropdownButtonFormField<String>(
+              //   value: selectedCategory,
+              //   hint: Text('Select Category'),
+              //   items: categories.map((String category) {
+              //     return DropdownMenuItem<String>(
+              //       value: category,
+              //       child: Text(category),
+              //     );
+              //   }).toList(),
+              //   onChanged: (String? newValue) {
+              //     setState(() {
+              //       selectedCategory = newValue;
+              //     });
+              //   },
+              //   decoration: InputDecoration(
+              //     border: OutlineInputBorder(),
+              //   ),
+              // ),
               SizedBox(height: 20),
               Center(
                 child: ElevatedButton(

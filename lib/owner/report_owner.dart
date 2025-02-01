@@ -8,12 +8,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: AdminReportPage(),
+      home: OwnerReportPage(),
     );
   }
 }
 
-class AdminReportPage extends StatelessWidget {
+class OwnerReportPage extends StatelessWidget {
   final List<ReportItem> reportItems = [
     ReportItem(
       productName: 'Potensic ATOM SE',
@@ -21,7 +21,7 @@ class AdminReportPage extends StatelessWidget {
       status: 'Finish',
       quantity: 1,
       date: '09 Desember 2024',
-      imageUrl: 'http://10.0.2.2/beinventori/uploads/product_1737474296.jpg',
+      imageUrl: 'http://10.0.2.2/beinventori/uploads/product_1736661686.jpg',
     ),
     ReportItem(
       productName: 'Potensic ATOM SE',
@@ -29,7 +29,7 @@ class AdminReportPage extends StatelessWidget {
       status: 'Return',
       quantity: 1,
       date: '09 Desember 2024',
-      imageUrl: 'http://10.0.2.2/beinventori/uploads/product_1737474296.jpg',
+      imageUrl: 'http://10.0.2.2/beinventori/uploads/product_1736661686.jpg',
       // imageUrl: 'https://via.placeholder.com/100',
     ),
   ];

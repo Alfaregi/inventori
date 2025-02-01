@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'cart_customer.dart'; // Import cart page
 
 class MyApp extends StatelessWidget {
   @override
@@ -19,20 +22,75 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  int selectedPaymentMethod = 0; // Menyimpan metode pembayaran yang dipilih
-
-  List<CartItem> cartItems = [
-    CartItem(name: 'Potensic ATOM SE GPS Drone', price: 229, quantity: 1),
-  ];
-
-  double get total {
-    return cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
-  }
-
   final TextEditingController addressController = TextEditingController();
+
+  Future<void> initiatePayment() async {
+    final String url =
+        'http://10.0.2.2/beinventori/payment.php'; // Replace with your server URL
+
+    // Retrieve cart items from the static list in CartPage
+    List<CartItem> cartItems = CartPage.cartItems;
+
+    if (cartItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Your cart is empty!')),
+      );
+      return;
+    }
+
+    double total =
+        cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
+
+    final Map<String, dynamic> paymentData = {
+      'order_id':
+          'order-${DateTime.now().millisecondsSinceEpoch}', // Unique order ID
+      'gross_amount': total,
+      'items': cartItems
+          .map((item) => {
+                'id': item.id, // Ensure this is a unique identifier
+                'name': item.name,
+                'price': item.price,
+                'quantity': item.quantity,
+              })
+          .toList(),
+      'address': addressController.text,
+      'username': 'rezi', // Add the username here
+    };
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(paymentData),
+    );
+
+    // Print the raw response for debugging
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      // Handle the response from Midtrans
+      print('Payment Response: $responseData');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment initiated successfully!')),
+      );
+    } else {
+      // Handle error
+      print('Error: ${response.body}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment failed: ${response.body}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Retrieve cart items from the static list in CartPage
+    List<CartItem> cartItems = CartPage.cartItems;
+
+    double total =
+        cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Payment Options'),
@@ -52,21 +110,21 @@ class _PaymentPageState extends State<PaymentPage> {
                 itemCount: cartItems.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    leading: Image.asset(
-                      'assets/images/ban.png', // Ganti dengan URL gambar produk
+                    leading: Image.network(
+                      cartItems[index]
+                          .imageUrl, // Use the imageUrl from CartItem
                       width: 50,
                       height: 50,
                     ),
                     title: Text(cartItems[index].name),
-                    subtitle:
-                        Text('\$${cartItems[index].price.toStringAsFixed(2)}'),
+                    subtitle: Text(
+                        'IDR ${cartItems[index].price.toStringAsFixed(0)}'),
                     trailing: Text('Qty: ${cartItems[index].quantity}'),
                   );
                 },
               ),
             ),
             Divider(),
-            // Form Alamat
             Text(
               'Shipping Address:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -82,86 +140,13 @@ class _PaymentPageState extends State<PaymentPage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                'Sub Total: \$${total.toStringAsFixed(2)}',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            ),
-            Text(
-              'Payment Method:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            ListTile(
-              title: Text('Credit / Debit'),
-              leading: Radio(
-                value: 0,
-                groupValue: selectedPaymentMethod,
-                onChanged: (value) {
-                  setState(() {
-                    selectedPaymentMethod = value as int;
-                  });
-                },
-              ),
-            ),
-            ListTile(
-              title: Text('Paypal'),
-              leading: Radio(
-                value: 1,
-                groupValue: selectedPaymentMethod,
-                onChanged: (value) {
-                  setState(() {
-                    selectedPaymentMethod = value as int;
-                  });
-                },
-              ),
-            ),
-            ListTile(
-              title: Text('QRIS'),
-              leading: Radio(
-                value: 2,
-                groupValue: selectedPaymentMethod,
-                onChanged: (value) {
-                  setState(() {
-                    selectedPaymentMethod = value as int;
-                  });
-                },
-              ),
-            ),
-            ListTile(
-              title: Text('BCA'),
-              leading: Radio(
-                value: 3,
-                groupValue: selectedPaymentMethod,
-                onChanged: (value) {
-                  setState(() {
-                    selectedPaymentMethod = value as int;
-                  });
-                },
-              ),
-            ),
-            ListTile(
-              title: Text('Mandiri'),
-              leading: Radio(
-                value: 4,
-                groupValue: selectedPaymentMethod,
-                onChanged: (value) {
-                  setState(() {
-                    selectedPaymentMethod = value as int;
-                  });
-                },
-              ),
-            ),
-            Divider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Text(
-                'Total: \$${total.toStringAsFixed(2)}',
+                'Total: IDR ${total.toStringAsFixed(0)}',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
             ElevatedButton(
               onPressed: () {
-                // Aksi untuk menyelesaikan pembayaran
-                // Anda bisa menggunakan addressController.text untuk mendapatkan alamat
+                initiatePayment(); // Call the payment initiation function
               },
               child: Text('Pay'),
               style: ElevatedButton.styleFrom(
@@ -175,12 +160,4 @@ class _PaymentPageState extends State<PaymentPage> {
       ),
     );
   }
-}
-
-class CartItem {
-  final String name;
-  final double price;
-  int quantity;
-
-  CartItem({required this.name, required this.price, required this.quantity});
 }
