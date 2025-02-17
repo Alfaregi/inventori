@@ -22,43 +22,32 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Future<void> fetchData() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
     try {
-      print('Fetching data...');
       final response =
           await http.get(Uri.parse('http://10.0.2.2/beinventori/history.php'));
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}'); // Log the response body
-
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          checkoutItems = data.map((item) {
-            return CheckoutItem(
-              productName: item['name'] as String,
-              price: int.tryParse(item['price'].toString()) ??
-                  0, // Default to 0 if null
-              quantity: int.tryParse(item['quantity'].toString()) ??
-                  0, // Default to 0 if null
-              date: item['created_at'] as String,
-              status: item['status'] as String,
-              address: item['address'] ?? 'Address not provided',
-              userId: item['user_id'] ?? 0, // Ensure userId is provided
-              productId:
-                  item['product_id'] ?? 0, // Ensure productId is provided
-            );
-          }).toList();
-          isLoading = false; // Set loading to false after data is fetched
+          checkoutItems =
+              data.map((item) => CheckoutItem.fromJson(item)).toList();
+          filteredItems = checkoutItems;
+          isLoading = false;
         });
       } else {
         setState(() {
           errorMessage = 'Failed to load data';
-          isLoading = false; // Set loading to false on error
+          isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
         errorMessage = 'Error: $e';
-        isLoading = false; // Set loading to false on exception
+        isLoading = false;
       });
     }
   }
@@ -70,16 +59,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
         headers: {"Content-Type": "application/json"},
         body: json.encode({
           'status': newStatus,
-          'user_id': checkoutItems[index]
-              .userId, // Ensure you have userId in your CheckoutItem
-          'product_id': checkoutItems[index]
-              .productId, // Ensure you have productId in your CheckoutItem
+          'user_id': checkoutItems[index].userId,
+          'product_id': checkoutItems[index].productId,
         }),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          // checkoutItems[index].status = newStatus; // Update the status locally
+          checkoutItems[index].status = newStatus;
+          filterItems();
         });
         showDialog(
           context: context,
@@ -210,8 +198,8 @@ class CheckoutItem {
   String date;
   String status;
   String address;
-  int userId; // Add this
-  int productId; // Add this
+  int userId;
+  int productId;
 
   CheckoutItem({
     required this.productName,
@@ -220,9 +208,22 @@ class CheckoutItem {
     required this.date,
     required this.status,
     required this.address,
-    required this.userId, // Add this
-    required this.productId, // Add this
+    required this.userId,
+    required this.productId,
   });
+
+  factory CheckoutItem.fromJson(Map<String, dynamic> json) {
+    return CheckoutItem(
+      productName: json['name'] as String,
+      price: int.tryParse(json['price'].toString()) ?? 0,
+      quantity: int.tryParse(json['quantity'].toString()) ?? 0,
+      date: json['created_at'] as String,
+      status: json['status'] as String,
+      address: json['address'] as String,
+      userId: json['user_id'] ?? 0,
+      productId: json['product_id'] ?? 0,
+    );
+  }
 }
 
 class CheckoutCard extends StatelessWidget {
@@ -242,14 +243,15 @@ class CheckoutCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Qty: ${item.quantity} - IDR ${item.price}'),
-            Text(
-                'Date: ${item.date}'), // Menampilkan tanggal di bawah harga dan qty
+            Text('Date: ${item.date}'),
           ],
         ),
-        trailing: Text(item.status,
-            style: TextStyle(
-                color:
-                    item.status == 'Finished' ? Colors.green : Colors.orange)),
+        trailing: Text(
+          item.status,
+          style: TextStyle(
+            color: item.status == 'Finished' ? Colors.green : Colors.orange,
+          ),
+        ),
         onTap: onTap,
       ),
     );
@@ -304,6 +306,16 @@ class _CheckoutDetailPageState extends State<CheckoutDetailPage> {
                     Navigator.pop(context);
                   },
                 ),
+                ListTile(
+                  title: Text('Finished'),
+                  onTap: () {
+                    setState(() {
+                      currentStatus = 'Finished';
+                    });
+                    widget.onStatusChange('Finished');
+                    Navigator.pop(context);
+                  },
+                ),
               ],
             ),
           ),
@@ -331,8 +343,10 @@ class _CheckoutDetailPageState extends State<CheckoutDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Product Name: ${widget.item.productName}',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(
+              'Product Name: ${widget.item.productName}',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             SizedBox(height: 10),
             Text('Price: IDR ${widget.item.price}',
                 style: TextStyle(fontSize: 18)),

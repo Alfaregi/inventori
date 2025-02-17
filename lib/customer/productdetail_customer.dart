@@ -21,6 +21,17 @@ class ProductDetailPage extends StatelessWidget {
 
   Future<void> _showQuantityDialog(
       BuildContext context, Product product) async {
+    if (product.stock == 0) {
+      // Show a message if the stock is 0
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'This product is out of stock and cannot be added to the cart.'),
+        ),
+      );
+      return; // Exit the function early to prevent the dialog from showing
+    }
+
     int quantity = 1; // Default quantity
 
     return showDialog<void>(

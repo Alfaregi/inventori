@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -16,11 +15,18 @@ class MyApp extends StatelessWidget {
 
 class FAQPage extends StatelessWidget {
   final List<FAQ> faqs = [
-    FAQ(question: 'What is the return policy?', answer: 'You can return any item within 3 days of purchase.'),
-    FAQ(question: 'How do I track my order?', answer: 'You can track your order using the tracking link sent to your email.'),
-    FAQ(question: 'What payment methods are accepted?', answer: 'We accept credit cards, PayPal, and bank transfers.'),
-    FAQ(question: 'How can I contact customer support?', answer: 'You can contact us via whatsapp or through our support chat.'),
-    FAQ(question: 'Do you ship internationally?', answer: 'Yes, we ship to most countries worldwide.'),
+    FAQ(
+        question: 'What is the return policy?',
+        answer: 'You can return any item within 3 days of purchase.'),
+    FAQ(
+        question: 'How do I track my order?',
+        answer: 'You can track your order using the tracking link.'),
+    FAQ(
+        question: 'What payment methods are accepted?',
+        answer: 'We accept credit cards, Qris, and bank transfers.'),
+    FAQ(
+        question: 'How can I contact customer support?',
+        answer: 'You can contact us via whatsapp ( Alfaregi - 085934759574 ).'),
   ];
 
   @override
