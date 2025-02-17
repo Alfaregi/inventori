@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MyApp extends StatelessWidget {
   @override
@@ -14,25 +15,38 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HistoryPage extends StatelessWidget {
-  final List<Order> orders = [
-    Order(
-      productName: 'Potensic ATOM SE GPS Drone',
-      price: 229.99,
-      status: 'Finish',
-      quantity: 1,
-      date: '09 Desember 2024',
-      imageUrl: 'https://via.placeholder.com/100', // Ganti dengan URL gambar produk
-    ),
-    Order(
-      productName: 'Potensic ATOM SE GPS Drone',
-      price: 229.99,
-      status: 'Return',
-      quantity: 1,
-      date: '09 Desember 2024',
-      imageUrl: 'https://via.placeholder.com/100', // Ganti dengan URL gambar produk
-    ),
-  ];
+class HistoryPage extends StatefulWidget {
+  @override
+  _HistoryPageState createState() => _HistoryPageState();
+}
+
+class _HistoryPageState extends State<HistoryPage> {
+  List<Order> orders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchOrders();
+  }
+
+  Future<void> fetchOrders() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://10.0.2.2/beinventori/history.php'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          orders = List<Order>.from(
+              json.decode(response.body).map((x) => Order.fromJson(x)));
+        });
+      } else {
+        throw Exception(
+            'Gagal memuat pesanan, status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching orders: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,21 +86,33 @@ class HistoryPage extends StatelessWidget {
 }
 
 class Order {
-  final String productName;
+  final String name;
   final double price;
   final String status;
-  final int quantity;
-  final String date;
-  final String imageUrl;
+  final String quantity;
+  final String created_at;
+  final String image;
 
   Order({
-    required this.productName,
+    required this.name,
     required this.price,
     required this.status,
     required this.quantity,
-    required this.date,
-    required this.imageUrl,
+    required this.created_at,
+    required this.image,
   });
+
+  factory Order.fromJson(Map<String, dynamic> json) {
+    return Order(
+      name: json['name'],
+      price:
+          double.tryParse(json['price'].toString()) ?? 0.0, // Perbaikan di sini
+      status: json['status'],
+      quantity: json['quantity'],
+      created_at: json['created_at'],
+      image: json['image'],
+    );
+  }
 }
 
 class OrderCard extends StatelessWidget {
@@ -104,9 +130,12 @@ class OrderCard extends StatelessWidget {
         child: Row(
           children: [
             Image.network(
-              order.imageUrl,
+              order.image,
               width: 100,
               height: 100,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(Icons.broken_image, size: 100);
+              },
             ),
             SizedBox(width: 16),
             Expanded(
@@ -114,13 +143,17 @@ class OrderCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    order.productName,
+                    order.name,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text('\$${order.price.toStringAsFixed(2)}'),
-                  Text('Status: ${order.status}', style: TextStyle(color: order.status == 'Finish' ? Colors.green : Colors.red)),
+                  // Text('Status: ${order.status}',
+                  //     style: TextStyle(
+                  //         color: order.status == 'Finish'
+                  //             ? Colors.green
+                  //             : Colors.red)),
                   Text('Qty: ${order.quantity}'),
-                  Text(order.date),
+                  Text(order.created_at),
                 ],
               ),
             ),

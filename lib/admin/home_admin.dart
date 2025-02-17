@@ -128,30 +128,40 @@ class AdminHomePageContent extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              StatCard(
+              Expanded(
+                child: StatCard(
                   label: 'Total Products',
                   value: products.length.toString(),
-                  color: Colors.pink),
-              StatCard(
-                  label: 'Total Transaction', value: '10', color: Colors.blue),
-              StatCard(
-                  label: 'Income', value: 'IDR 750.000', color: Colors.green),
-              StatCard(label: 'Check Out', value: '3', color: Colors.orange),
+                  color: Colors.pink,
+                ),
+              ),
+              // StatCard(
+              //     label: 'Total Transaction', value: '10', color: Colors.blue),
+              // StatCard(
+              //     label: 'Income', value: 'IDR 750.000', color: Colors.green),
+              // StatCard(label: 'Check Out', value: '3', color: Colors.orange),
             ],
           ),
           SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              // Navigate to the update product page
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => AddProductPage()));
-            },
-            child: Text('Add Product'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              padding: EdgeInsets.symmetric(vertical: 15),
-              textStyle: TextStyle(fontSize: 18),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddProductPage()));
+                  },
+                  child: Text('Add Product'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    textStyle: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 20),
           Text('Available Products',
@@ -194,7 +204,7 @@ class AdminHomePageContent extends StatelessWidget {
 }
 
 class Product {
-  final String id; // Add ID field
+  final String product_id; // Add ID field
   final String name;
   final String description; // Add this if you want to display the description
   final int quantity;
@@ -202,7 +212,7 @@ class Product {
   final double price; // Add price field
 
   Product({
-    required this.id,
+    required this.product_id,
     required this.name,
     required this.description,
     required this.quantity,
@@ -212,7 +222,7 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'].toString(), // Ensure ID is a string
+      product_id: json['product_id'].toString(), // Ensure ID is a string
       name: json['name'] ?? 'Unknown Product',
       description: json['description'] ?? 'No Description',
       quantity: int.tryParse(json['stock'].toString()) ?? 0,
@@ -224,6 +234,8 @@ class Product {
   get stock => null;
 
   get image => null;
+
+  get id => null;
 }
 
 class StatCard extends StatelessWidget {

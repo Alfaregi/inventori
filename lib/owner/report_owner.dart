@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MyApp extends StatelessWidget {
   @override
@@ -13,69 +15,93 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class OwnerReportPage extends StatelessWidget {
-  final List<ReportItem> reportItems = [
-    ReportItem(
-      productName: 'Potensic ATOM SE',
-      price: 750000,
-      status: 'Finish',
-      quantity: 1,
-      date: '09 Desember 2024',
-      imageUrl: 'http://10.0.2.2/beinventori/uploads/product_1736661686.jpg',
-    ),
-    ReportItem(
-      productName: 'Potensic ATOM SE',
-      price: 750000,
-      status: 'Return',
-      quantity: 1,
-      date: '09 Desember 2024',
-      imageUrl: 'http://10.0.2.2/beinventori/uploads/product_1736661686.jpg',
-      // imageUrl: 'https://via.placeholder.com/100',
-    ),
-  ];
+class OwnerReportPage extends StatefulWidget {
+  @override
+  _OwnerReportPageState createState() => _OwnerReportPageState();
+}
+
+class _OwnerReportPageState extends State<OwnerReportPage> {
+  List<ReportItem> reportItems = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://10.0.2.2/beinventori/history.php'));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          reportItems = data
+              .map((item) => ReportItem(
+                    productName: item['name'],
+                    price: int.tryParse(item['price'].toString()) ?? 0,
+                    status: item['status'],
+                    quantity: int.tryParse(item['quantity'].toString()) ?? 0,
+                    date: item['created_at'],
+                    imageUrl: item['image'],
+                  ))
+              .toList();
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+      setState(() {
+        isLoading = false; // Stop loading indicator
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     int totalIncome = reportItems
-        .where((item) =>
-            item.status ==
-            'Finish') // Hanya menghitung item dengan status 'Finish'
+        .where((item) => item.status == 'Finish' || item.status == 'pending')
         .fold(0, (sum, item) => sum + item.price);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('REPORT'),
-        // Menghapus leading untuk menghilangkan tanda panah
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Your Income',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'IDR +$totalIncome',
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green),
-            ),
-            SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: reportItems.length,
-                itemBuilder: (context, index) {
-                  return ReportCard(item: reportItems[index]);
-                },
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Your Income',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'IDR +$totalIncome',
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green),
+                  ),
+                  SizedBox(height: 20),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: reportItems.length,
+                      itemBuilder: (context, index) {
+                        return ReportCard(item: reportItems[index]);
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -118,6 +144,22 @@ class ReportCard extends StatelessWidget {
               width: 80,
               height: 80,
               fit: BoxFit.cover,
+              loadingBuilder: (BuildContext context, Widget child,
+                  ImageChunkEvent? loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                        : null,
+                  ),
+                );
+              },
+              errorBuilder: (BuildContext context, Object exception,
+                  StackTrace? stackTrace) {
+                return Icon(Icons.error);
+              },
             ),
             SizedBox(width: 18),
             Expanded(
@@ -129,12 +171,10 @@ class ReportCard extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text('IDR ${item.price}'),
-                  Text(
-                    'Status: ${item.status}',
-                    style: TextStyle(
-                        color:
-                            statusColor), // Mengubah warna teks berdasarkan status
-                  ),
+                  // Text(
+                  //   'Status: ${item.status}',
+                  //   style: TextStyle(color: statusColor),
+                  // ),
                   Text('Qty: ${item.quantity}'),
                   Text(item.date),
                 ],
@@ -145,4 +185,8 @@ class ReportCard extends StatelessWidget {
       ),
     );
   }
+}
+
+void main() {
+  runApp(MyApp());
 }

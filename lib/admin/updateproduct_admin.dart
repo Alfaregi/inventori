@@ -15,7 +15,7 @@ class UpdateProductPage1 extends StatefulWidget {
 class _UpdateProductPage1State extends State<UpdateProductPage1> {
   final _formKey = GlobalKey<FormState>();
   late String _name;
-  late String _description;
+  // late String _description;
   late String _price; // Tetap sebagai String untuk TextFormField
   late String _stock;
 
@@ -24,7 +24,7 @@ class _UpdateProductPage1State extends State<UpdateProductPage1> {
     super.initState();
     // Inisialisasi field dengan data produk saat ini
     _name = widget.product.name;
-    _description = widget.product.description;
+    // _description = widget.product.description;
     _price = widget.product.price.toString(); // Ambil harga dari produk
     _stock = widget.product.quantity.toString();
   }
@@ -33,9 +33,9 @@ class _UpdateProductPage1State extends State<UpdateProductPage1> {
     final response = await http.post(
       Uri.parse('http://10.0.2.2/beinventori/updateproduct_admin.php'),
       body: {
-        'id': widget.product.id,
+        'product_id': widget.product.product_id,
         'name': _name,
-        'description': _description,
+        // 'description': _description,
         'price': _price,
         'stock': _stock,
         'id_category': '1', // Sesuaikan jika perlu
@@ -94,13 +94,13 @@ class _UpdateProductPage1State extends State<UpdateProductPage1> {
                 validator: (value) =>
                     value!.isEmpty ? 'Please enter product name' : null,
               ),
-              TextFormField(
-                initialValue: _description,
-                decoration: InputDecoration(labelText: 'Description'),
-                onSaved: (value) => _description = value ?? '',
-                validator: (value) =>
-                    value!.isEmpty ? 'Please enter description' : null,
-              ),
+              // TextFormField(
+              //   initialValue: _description,
+              //   decoration: InputDecoration(labelText: 'Description'),
+              //   onSaved: (value) => _description = value ?? '',
+              //   validator: (value) =>
+              //       value!.isEmpty ? 'Please enter description' : null,
+              // ),
               TextFormField(
                 initialValue: _price,
                 decoration: InputDecoration(labelText: 'Price'),
@@ -134,4 +134,3 @@ class _UpdateProductPage1State extends State<UpdateProductPage1> {
     );
   }
 }
-

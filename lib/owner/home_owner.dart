@@ -87,7 +87,7 @@ class OwnerHomePageState extends State<OwnerHomePage> {
     final response = await http.post(
       Uri.parse('http://10.0.2.2/beinventori/approveupdate.php'),
       body: {
-        'id': pendingUpdateId.toString(),
+        'product_id': pendingUpdateId.toString(),
       },
     );
 
@@ -115,7 +115,7 @@ class OwnerHomePageState extends State<OwnerHomePage> {
     final response = await http.post(
       Uri.parse('http://10.0.2.2/beinventori/disapproveupdate.php'),
       body: {
-        'id': pendingUpdateId.toString(),
+        'product_id': pendingUpdateId.toString(),
       },
     );
 
@@ -203,15 +203,18 @@ class OwnerHomePageContent extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              StatCard(
+              Expanded(
+                child: StatCard(
                   label: 'Total Products',
                   value: products.length.toString(),
-                  color: Colors.pink),
-              StatCard(
-                  label: 'Total Transaction', value: '10', color: Colors.blue),
-              StatCard(
-                  label: 'Income', value: 'IDR 750.000', color: Colors.green),
-              StatCard(label: 'Check Out', value: '3', color: Colors.orange),
+                  color: Colors.pink,
+                ),
+              ),
+              // StatCard(
+              //     label: 'Total Transaction', value: '10', color: Colors.blue),
+              // StatCard(
+              //     label: 'Income', value: 'IDR 750.000', color: Colors.green),
+              // StatCard(label: 'Check Out', value: '3', color: Colors.orange),
             ],
           ),
           SizedBox(height: 20),
@@ -237,18 +240,20 @@ class OwnerHomePageContent extends StatelessWidget {
                     child: ListTile(
                       title: Text(update['name'],
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(update['description'],
-                          style: TextStyle(color: Colors.black54)),
+                      // subtitle: Text(update['description'],
+                      //     style: TextStyle(color: Colors.black54)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
                             icon: Icon(Icons.check, color: Colors.green),
-                            onPressed: () => approveUpdate(update['id']),
+                            onPressed: () => approveUpdate(
+                                int.parse(update['product_id'].toString())),
                           ),
                           IconButton(
                             icon: Icon(Icons.close, color: Colors.red),
-                            onPressed: () => disapproveUpdate(update['id']),
+                            onPressed: () => disapproveUpdate(
+                                int.parse(update['product_id'].toString())),
                           ),
                           Text('Qty ${update['stock']}',
                               style: TextStyle(color: Colors.green)),
@@ -267,17 +272,17 @@ class OwnerHomePageContent extends StatelessWidget {
 }
 
 class Product {
-  final String id; // Tambahkan field ID
+  final String product_id; // Tambahkan field ID
   final String name;
-  final String description; // Tambahkan ini jika ingin menampilkan deskripsi
+  // final String description; // Tambahkan ini jika ingin menampilkan deskripsi
   final int quantity;
   final String imageUrl;
   final double price; // Tambahkan field harga
 
   Product({
-    required this.id,
+    required this.product_id,
     required this.name,
-    required this.description,
+    // required this.description,
     required this.quantity,
     required this.imageUrl,
     required this.price, // Sertakan harga dalam konstruktor
@@ -285,9 +290,9 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'].toString(), // Pastikan ID adalah string
+      product_id: json['product_id'].toString(), // Pastikan ID adalah string
       name: json['name'] ?? 'Unknown Product',
-      description: json['description'] ?? 'No Description',
+      // description: json['description'] ?? 'No Description',
       quantity: int.tryParse(json['stock'].toString()) ?? 0,
       imageUrl: json['image'] ?? '',
       price: double.tryParse(json['price'].toString()) ?? 0, // Parse harga
