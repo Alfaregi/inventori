@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventori/admin/information.dart';
 import 'package:inventori/login.dart'; // Pastikan jalur ini benar
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -46,12 +47,6 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('MY PROFILE'),
-        // leading: IconButton(
-        //   icon: Icon(Icons.arrow_back),
-        //   onPressed: () {
-        //     Navigator.pop(context); // Aksi untuk kembali
-        //   },
-        // ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -78,6 +73,15 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 20),
+            ActivityButton(
+              label: 'Information',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => InformationPage()),
+                );
+              },
+            ),
             ActivityButton(
               label: 'Logout',
               onPressed: () {
@@ -141,6 +145,7 @@ class ActivityButton extends StatelessWidget {
         child: Text(label),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green, // Warna latar belakang tombol
+          foregroundColor: Colors.purple, // Warna teks tombol
           padding: EdgeInsets.symmetric(vertical: 16.0),
           textStyle: TextStyle(fontSize: 18),
         ),

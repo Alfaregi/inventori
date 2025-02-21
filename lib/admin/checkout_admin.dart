@@ -200,6 +200,7 @@ class CheckoutItem {
   String address;
   int userId;
   int productId;
+  String courier;
 
   CheckoutItem({
     required this.productName,
@@ -210,6 +211,7 @@ class CheckoutItem {
     required this.address,
     required this.userId,
     required this.productId,
+    required this.courier,
   });
 
   factory CheckoutItem.fromJson(Map<String, dynamic> json) {
@@ -222,6 +224,7 @@ class CheckoutItem {
       address: json['address'] as String,
       userId: json['user_id'] ?? 0,
       productId: json['product_id'] ?? 0,
+      courier: json['courier'] as String,
     );
   }
 }
@@ -355,6 +358,8 @@ class _CheckoutDetailPageState extends State<CheckoutDetailPage> {
             Text('Date: ${widget.item.date}', style: TextStyle(fontSize: 18)),
             Text('Status: $currentStatus', style: TextStyle(fontSize: 18)),
             Text('Address: ${widget.item.address}',
+                style: TextStyle(fontSize: 18)),
+            Text('Courier: ${widget.item.courier}',
                 style: TextStyle(fontSize: 18)),
             SizedBox(height: 20),
             ElevatedButton(

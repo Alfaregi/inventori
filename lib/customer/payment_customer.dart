@@ -11,6 +11,8 @@ class PaymentPage extends StatefulWidget {
 
 class _PaymentPageState extends State<PaymentPage> {
   final TextEditingController addressController = TextEditingController();
+  String? selectedCourier;
+  String? selectedLocation;
 
   Future<void> initiatePayment() async {
     final String url =
@@ -36,15 +38,16 @@ class _PaymentPageState extends State<PaymentPage> {
       }
     }
 
-    double total =
-        cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
-
+    double total = cartItems.fold(
+        0, (sum, item) => sum + (item.price * item.quantity));
+    int ongkir = (selectedLocation == 'Jabodetabek') ? 30000 : 50000;
+    double totalWithShipping = total + ongkir;
     int userId = 1; // Ganti dengan user ID yang sesuai
 
     final Map<String, dynamic> paymentData = {
       'order_id':
           'order-${DateTime.now().millisecondsSinceEpoch}', // ID pesanan unik
-      'gross_amount': total,
+      'gross_amount': totalWithShipping,
       'items': cartItems
           .map((item) => {
                 'product_id': item.product_id,
@@ -56,6 +59,9 @@ class _PaymentPageState extends State<PaymentPage> {
       'address': addressController.text,
       'username': 'rezi', // Ganti dengan username yang sesuai
       'user_id': userId,
+      'courier': selectedCourier,
+      'location': selectedLocation,
+      'ongkir': ongkir,
     };
 
     final response = await http.post(
@@ -97,6 +103,8 @@ class _PaymentPageState extends State<PaymentPage> {
     List<CartItem> cartItems = CartPage.cartItems;
     double total =
         cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
+    int ongkir = (selectedLocation == 'Jabodetabek') ? 30000 : 50000;
+    double totalWithShipping = total + ongkir;
 
     return Scaffold(
       appBar: AppBar(
@@ -135,10 +143,56 @@ class _PaymentPageState extends State<PaymentPage> {
                 labelText: 'Masukkan Nama dan alamat Anda',
               ),
             ),
+            Text('Opsi Pengiriman',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: DropdownButton<String>(
+                      value: selectedCourier,
+                      hint: Text('Pilih Kurir'),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedCourier = newValue;
+                        });
+                      },
+                      items: <String>['Sicepat', 'Anter Aja', 'J&T', 'JNE']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: DropdownButton<String>(
+                    value: selectedLocation,
+                    hint: Text('Pilih Lokasi'),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedLocation = newValue;
+                      });
+                    },
+                    items: <String>['Jabodetabek', 'Luar Jabodetabek']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
             SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Text('Total: IDR ${total.toStringAsFixed(0)}',
+              child: Text('Total: IDR ${totalWithShipping.toStringAsFixed(0)}',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ),
             ElevatedButton(
