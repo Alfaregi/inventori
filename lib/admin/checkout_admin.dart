@@ -59,7 +59,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         headers: {"Content-Type": "application/json"},
         body: json.encode({
           'status': newStatus,
-          'user_id': checkoutItems[index].userId,
+          'id': checkoutItems[index].userId,
           'product_id': checkoutItems[index].productId,
         }),
       );
@@ -222,7 +222,7 @@ class CheckoutItem {
       date: json['created_at'] as String,
       status: json['status'] as String,
       address: json['address'] as String,
-      userId: json['user_id'] ?? 0,
+      userId: json['id'] ?? 0,
       productId: json['product_id'] ?? 0,
       courier: json['courier'] as String,
     );

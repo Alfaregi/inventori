@@ -58,7 +58,7 @@ class _PaymentPageState extends State<PaymentPage> {
           .toList(),
       'address': addressController.text,
       'username': 'rezi', // Ganti dengan username yang sesuai
-      'user_id': userId,
+      'id': userId,
       'courier': selectedCourier,
       'location': selectedLocation,
       'ongkir': ongkir,
@@ -285,7 +285,7 @@ class _PaymentPageState extends State<PaymentPage> {
 //           .toList(),
 //       'address': addressController.text,
 //       'username': 'murod', // Ganti dengan username yang sesuai
-//       'user_id': userId, // Kirim ID pengguna yang sesuai
+//       'id': userId, // Kirim ID pengguna yang sesuai
 //     };
 
 //     final response = await http.post(

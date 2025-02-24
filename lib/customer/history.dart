@@ -147,11 +147,11 @@ class OrderCard extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text('\$${order.price.toStringAsFixed(2)}'),
-                  // Text('Status: ${order.status}',
-                  //     style: TextStyle(
-                  //         color: order.status == 'Finish'
-                  //             ? Colors.green
-                  //             : Colors.red)),
+                  Text('Status: ${order.status}',
+                      style: TextStyle(
+                          color: order.status == 'delivered'
+                              ? Colors.green
+                              : Colors.red)),
                   Text('Qty: ${order.quantity}'),
                   Text(order.created_at),
                 ],

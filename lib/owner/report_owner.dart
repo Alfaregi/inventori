@@ -411,7 +411,10 @@ class _OwnerReportPageState extends State<OwnerReportPage> {
   @override
   Widget build(BuildContext context) {
     int totalIncome = reportItems
-        .where((item) => item.status == 'Finish' || item.status == 'pending')
+        .where((item) =>
+            item.status == 'Finished' ||
+            item.status == 'pending' ||
+            item.status == 'delivered')
         .fold(0, (sum, item) => sum + item.price);
 
     int totalOutcome = outcomeItems.fold(0, (sum, item) => sum + item.price);

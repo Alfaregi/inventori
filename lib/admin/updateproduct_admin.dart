@@ -18,6 +18,7 @@ class _UpdateProductPage1State extends State<UpdateProductPage1> {
   // late String _description;
   late String _price; // Tetap sebagai String untuk TextFormField
   late String _stock;
+  late String _place;
 
   @override
   void initState() {
@@ -27,6 +28,7 @@ class _UpdateProductPage1State extends State<UpdateProductPage1> {
     // _description = widget.product.description;
     _price = widget.product.price.toString(); // Ambil harga dari produk
     _stock = widget.product.quantity.toString();
+    _place = widget.product.place.toString();
   }
 
   Future<void> _updateProduct() async {
@@ -38,6 +40,7 @@ class _UpdateProductPage1State extends State<UpdateProductPage1> {
         // 'description': _description,
         'price': _price,
         'stock': _stock,
+        'place': _place,
         'id_category': '1', // Sesuaikan jika perlu
       },
     );
@@ -117,6 +120,13 @@ class _UpdateProductPage1State extends State<UpdateProductPage1> {
                 validator: (value) =>
                     value!.isEmpty ? 'Please enter stock' : null,
               ),
+              // TextFormField(
+              //   initialValue: _place,
+              //   decoration: InputDecoration(labelText: 'Place'),
+              //   onSaved: (value) => _place = value ?? '',
+              //   validator: (value) =>
+              //       value!.isEmpty ? 'Please enter place' : null,
+              // ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {

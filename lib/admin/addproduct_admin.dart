@@ -27,6 +27,7 @@ class _AddProductPageState extends State<AddProductPage> {
   final TextEditingController productDetailController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController qtyController = TextEditingController();
+  final TextEditingController placeController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   XFile? _image;
   String? selectedCategory; // Variable to hold the selected category
@@ -38,6 +39,7 @@ class _AddProductPageState extends State<AddProductPage> {
     productDetailController.dispose();
     priceController.dispose();
     qtyController.dispose();
+    placeController.dispose();
     super.dispose();
   }
 
@@ -51,6 +53,7 @@ class _AddProductPageState extends State<AddProductPage> {
     final String description = productDetailController.text;
     final String price = priceController.text;
     final String stock = qtyController.text;
+    final String place = placeController.text;
     // final String idCategory = selectedCategory ?? ''; // Get selected category
 
     if (_image != null) {
@@ -68,6 +71,7 @@ class _AddProductPageState extends State<AddProductPage> {
           'price': price,
           'stock': stock,
           'image': base64Image,
+          'place': place,
           // 'id_category': idCategory, // Use selected category
         },
       );
@@ -160,6 +164,8 @@ class _AddProductPageState extends State<AddProductPage> {
               SizedBox(height: 16),
               _buildTextField(qtyController, 'Qty',
                   keyboardType: TextInputType.number),
+              SizedBox(height: 16),
+              _buildTextField(placeController, 'Place'),
               SizedBox(height: 20),
               // Dropdown for category selection
               // DropdownButtonFormField<String>(

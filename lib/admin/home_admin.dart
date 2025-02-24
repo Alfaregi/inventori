@@ -206,6 +206,7 @@ class AdminHomePageContent extends StatelessWidget {
 class Product {
   final String product_id; // Add ID field
   final String name;
+  final String place;
   final String description; // Add this if you want to display the description
   final int quantity;
   final String imageUrl;
@@ -214,6 +215,7 @@ class Product {
   Product({
     required this.product_id,
     required this.name,
+    required this.place,
     required this.description,
     required this.quantity,
     required this.imageUrl,
@@ -225,6 +227,7 @@ class Product {
       product_id: json['product_id'].toString(), // Ensure ID is a string
       name: json['name'] ?? 'Unknown Product',
       description: json['description'] ?? 'No Description',
+      place: json['place'] ?? 'No Place',
       quantity: int.tryParse(json['stock'].toString()) ?? 0,
       imageUrl: json['image'] ?? '',
       price: double.tryParse(json['price'].toString()) ?? 0, // Parse price
